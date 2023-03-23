@@ -14,6 +14,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 def exception_handler(exception_type, exception, traceback):
     print("%s: %s" % (exception_type.__name__, exception))
 sys.excepthook = exception_handler
+sys.tracebacklimit = 0
 
 def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):  
 
