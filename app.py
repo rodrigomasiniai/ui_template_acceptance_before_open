@@ -58,7 +58,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
     chat_counter+=1
 
     history.append(inputs)
-    print(f"payload is - {payload}")
+    #print(f"payload is - {payload}")
     # make a POST request to the API endpoint using the requests.post method, passing in stream=True
     response = requests.post(API_URL, headers=headers, json=payload, stream=True)
     print(f"response code - {response}")
@@ -87,7 +87,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
               chat = [(history[i], history[i + 1]) for i in range(0, len(history) - 1, 2) ]  # convert to tuples of list
               token_counter+=1
               yield chat, history, chat_counter, response  # resembles {chatbot: chat, state: history}  
-    print(partial_words)
+    print(json.dumps({"payload": payload, "partial_words": partial_words}))
                    
 
 def reset_textbox():
