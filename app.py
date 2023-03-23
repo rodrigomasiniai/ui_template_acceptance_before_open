@@ -67,6 +67,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
 
     counter=0
     for chunk in response.iter_lines():
+        print(f"chunk - {chunk}")
         #Skipping first chunk
         if counter == 0:
           counter+=1
