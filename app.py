@@ -69,8 +69,8 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
     response = requests.post(API_URL, headers=headers, json=payload, stream=True)
     response_code = f"{response}"
     if response_code.strip() != "<Response [200]>":
-        print(f"response code - {response}")
-        raise Exception("Sorry, hitting rate limit. Please try again later.")
+        #print(f"response code - {response}")
+        raise Exception(f"Sorry, hitting rate limit. Please try again later. {response}")
     token_counter = 0 
     partial_words = "" 
     counter=0
