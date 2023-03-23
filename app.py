@@ -1,5 +1,6 @@
 import gradio as gr
-import os 
+import os
+import sys
 import json 
 import requests
 
@@ -7,7 +8,12 @@ import requests
 API_URL = "https://api.openai.com/v1/chat/completions" #os.getenv("API_URL") + "/generate_stream"
 
 #Testing with my Open AI Key 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+#Supress errors
+def exception_handler(exception_type, exception, traceback):
+    print("%s: %s" % (exception_type.__name__, exception))
+sys.excepthook = exception_handler
 
 def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):  
 
