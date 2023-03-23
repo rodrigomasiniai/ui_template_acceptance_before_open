@@ -64,6 +64,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
     response_code = f"{response}"
     if response_code.strip() != "<Response [200]>":
         print(f"response code - {response}")
+        return
     token_counter = 0 
     partial_words = "" 
     counter=0
