@@ -27,7 +27,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
     "Authorization": f"Bearer {OPENAI_API_KEY}"
     }
 
-    print(f"chat_counter - {chat_counter}")
+    # print(f"chat_counter - {chat_counter}")
     if chat_counter != 0 :
         messages=[]
         for data in chatbot:
@@ -58,13 +58,14 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
     chat_counter+=1
 
     history.append(inputs)
-    #print(f"payload is - {payload}")
+    # print(f"payload is - {payload}")
     # make a POST request to the API endpoint using the requests.post method, passing in stream=True
     response = requests.post(API_URL, headers=headers, json=payload, stream=True)
-    print(f"response code - {response}")
+    response_code = f"{response}"
+    if response_code.strip() != "<Response [200]>":
+        print(f"response code - {response}")
     token_counter = 0 
     partial_words = "" 
-
     counter=0
     for chunk in response.iter_lines():
         #Skipping first chunk
@@ -87,7 +88,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
               chat = [(history[i], history[i + 1]) for i in range(0, len(history) - 1, 2) ]  # convert to tuples of list
               token_counter+=1
               yield chat, history, chat_counter, response  # resembles {chatbot: chat, state: history}  
-    print(json.dumps({"payload": payload, "partial_words": partial_words}))
+    print(json.dumps({"chat_counter": chat_counter, "payload": payload, "partial_words": partial_words, "token_counter": token_counter, "counter": counter}))
                    
 
 def reset_textbox():
