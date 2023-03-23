@@ -67,7 +67,6 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
 
     counter=0
     for chunk in response.iter_lines():
-        print(f"chunk - {chunk}")
         #Skipping first chunk
         if counter == 0:
           counter+=1
@@ -88,6 +87,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
               chat = [(history[i], history[i + 1]) for i in range(0, len(history) - 1, 2) ]  # convert to tuples of list
               token_counter+=1
               yield chat, history, chat_counter, response  # resembles {chatbot: chat, state: history}  
+    print(partial_words)
                    
 
 def reset_textbox():
