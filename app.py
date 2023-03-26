@@ -105,7 +105,7 @@ def reset_textbox():
 
 title = """<h1 align="center">🔥GPT4 with ChatCompletions API +🚀Gradio-Streaming</h1>"""
 if DISABLED:
-    title = """This app has reached OpenAI's usage limit. We are currently requesting an increase in our quota. Please check back in a few days."""
+    title = """<h1 align="center" style="color:red">This app has reached OpenAI's usage limit. We are currently requesting an increase in our quota. Please check back in a few days.</h1>"""
 description = """Language models can be conditioned to act like dialogue agents through a conversational prompt that typically takes the form:
 ```
 User: <utterance>
