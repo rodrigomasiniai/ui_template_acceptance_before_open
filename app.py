@@ -6,6 +6,7 @@ import requests
 
 #Streaming endpoint 
 API_URL = os.getenv("API_URL")
+DISABLED = os.getenv("DISABLED") == 'True'
 
 #Testing with my Open AI Key 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -103,6 +104,8 @@ def reset_textbox():
     return gr.update(value='')
 
 title = """<h1 align="center">🔥GPT4 with ChatCompletions API +🚀Gradio-Streaming</h1>"""
+if DISABLED:
+    title = """This app has reached OpenAI's usage limit. We are currently requesting an increase in our quota. Please check back in a few days."""
 description = """Language models can be conditioned to act like dialogue agents through a conversational prompt that typically takes the form:
 ```
 User: <utterance>
@@ -130,7 +133,7 @@ with gr.Blocks(css = """#col_container { margin-left: auto; margin-right: auto;}
         state = gr.State([]) #s
         with gr.Row():
             with gr.Column(scale=7):
-                b1 = gr.Button().style(full_width=True)
+                b1 = gr.Button(visible=not DISABLED).style(full_width=True)
             with gr.Column(scale=3):
                 server_status_code = gr.Textbox(label="Status code from OpenAI server", )
     
