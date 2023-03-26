@@ -5,7 +5,7 @@ import json
 import requests
 
 #Streaming endpoint 
-API_URL = "https://api.openai.com/v1/chat/completions" #os.getenv("API_URL") + "/generate_stream"
+API_URL = os.getenv("API_URL")
 
 #Testing with my Open AI Key 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
