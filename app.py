@@ -17,6 +17,20 @@ def exception_handler(exception_type, exception, traceback):
 sys.excepthook = exception_handler
 sys.tracebacklimit = 0
 
+#https://github.com/gradio-app/gradio/issues/3531#issuecomment-1484029099
+def parse_codeblock(text):
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        if "```" in line:
+            if line != "```":
+                lines[i] = f'<pre><code class="{lines[i][3:]}">'
+            else:
+                lines[i] = '</code></pre>'
+        else:
+            if i > 0:
+                lines[i] = "<br/>" + line.replace("<", "&lt;").replace(">", "&gt;")
+    return "".join(lines)
+    
 def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):  
 
     payload = {
@@ -37,24 +51,24 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
 
     # print(f"chat_counter - {chat_counter}")
     if chat_counter != 0 :
-        messages=[]
-        for data in chatbot:
-          temp1 = {}
-          temp1["role"] = "user" 
-          temp1["content"] = data[0] 
-          temp2 = {}
-          temp2["role"] = "assistant" 
-          temp2["content"] = data[1]
-          messages.append(temp1)
-          messages.append(temp2)
+        messages = []
+        for i, data in enumerate(history):
+          if i % 2 == 0:
+              role = 'user'
+          else:
+              role = 'assistant'
+          temp = {}
+          temp["role"] = role
+          temp["content"] = data
+          messages.append(temp)
+        
         temp3 = {}
         temp3["role"] = "user" 
         temp3["content"] = inputs
         messages.append(temp3)
-        #messages
         payload = {
         "model": "gpt-4",
-        "messages": messages, #[{"role": "user", "content": f"{inputs}"}],
+        "messages": messages,
         "temperature" : temperature, #1.0,
         "top_p": top_p, #1.0,
         "n" : 1,
@@ -66,7 +80,6 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
     chat_counter+=1
 
     history.append(inputs)
-    # print(f"payload is - {payload}")
     # make a POST request to the API endpoint using the requests.post method, passing in stream=True
     response = requests.post(API_URL, headers=headers, json=payload, stream=True)
     response_code = f"{response}"
@@ -94,7 +107,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
                 history.append(" " + partial_words)
               else:
                 history[-1] = partial_words
-              chat = [(history[i], history[i + 1]) for i in range(0, len(history) - 1, 2) ]  # convert to tuples of list
+              chat = [(parse_codeblock(history[i]), parse_codeblock(history[i + 1])) for i in range(0, len(history) - 1, 2) ]  # convert to tuples of list
               token_counter+=1
               yield chat, history, chat_counter, response  # resembles {chatbot: chat, state: history}  
     print(json.dumps({"chat_counter": chat_counter, "payload": payload, "partial_words": partial_words, "token_counter": token_counter, "counter": counter}))
