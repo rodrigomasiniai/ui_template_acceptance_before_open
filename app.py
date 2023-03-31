@@ -4,14 +4,11 @@ import sys
 import json 
 import requests
 
-#Streaming endpoint 
+MODEL = "gpt-4"
 API_URL = os.getenv("API_URL")
 DISABLED = os.getenv("DISABLED") == 'True'
-
-#Testing with my Open AI Key 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-#Supress errors
 def exception_handler(exception_type, exception, traceback):
     print("%s: %s" % (exception_type.__name__, exception))
 sys.excepthook = exception_handler
@@ -31,92 +28,94 @@ def parse_codeblock(text):
                 lines[i] = "<br/>" + line.replace("<", "&lt;").replace(">", "&gt;")
     return "".join(lines)
     
-def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):  
-
+def predict(inputs, top_p, temperature, chat_counter, chatbot=[], history=[]):
     payload = {
-    "model": "gpt-4",
-    "messages": [{"role": "user", "content": f"{inputs}"}],
-    "temperature" : 1.0,
-    "top_p":1.0,
-    "n" : 1,
-    "stream": True,
-    "presence_penalty":0,
-    "frequency_penalty":0,
+        "model": MODEL,
+        "messages": [{"role": "user", "content": f"{inputs}"}],
+        "temperature" : 1.0,
+        "top_p":1.0,
+        "n" : 1,
+        "stream": True,
+        "presence_penalty":0,
+        "frequency_penalty":0,
     }
 
     headers = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {OPENAI_API_KEY}"
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {OPENAI_API_KEY}"
     }
 
     # print(f"chat_counter - {chat_counter}")
     if chat_counter != 0 :
         messages = []
         for i, data in enumerate(history):
-          if i % 2 == 0:
-              role = 'user'
-          else:
-              role = 'assistant'
-          temp = {}
-          temp["role"] = role
-          temp["content"] = data
-          messages.append(temp)
+            if i % 2 == 0:
+                role = 'user'
+            else:
+                role = 'assistant'
+            message = {}
+            message["role"] = role
+            message["content"] = data
+            messages.append(message)
         
-        temp3 = {}
-        temp3["role"] = "user" 
-        temp3["content"] = inputs
-        messages.append(temp3)
+        message = {}
+        message["role"] = "user" 
+        message["content"] = inputs
+        messages.append(message)
         payload = {
-        "model": "gpt-4",
-        "messages": messages,
-        "temperature" : temperature, #1.0,
-        "top_p": top_p, #1.0,
-        "n" : 1,
-        "stream": True,
-        "presence_penalty":0,
-        "frequency_penalty":0,
+            "model": MODEL,
+            "messages": messages,
+            "temperature" : temperature,
+            "top_p": top_p,
+            "n" : 1,
+            "stream": True,
+            "presence_penalty":0,
+            "frequency_penalty":0,
         }
 
-    chat_counter+=1
+    chat_counter += 1
 
     history.append(inputs)
-    # make a POST request to the API endpoint using the requests.post method, passing in stream=True
-    response = requests.post(API_URL, headers=headers, json=payload, stream=True)
-    response_code = f"{response}"
-    if response_code.strip() != "<Response [200]>":
-        #print(f"response code - {response}")
-        raise Exception(f"Sorry, hitting rate limit. Please try again later. {response}")
     token_counter = 0 
     partial_words = "" 
-    counter=0
-    for chunk in response.iter_lines():
-        #Skipping first chunk
-        if counter == 0:
-          counter+=1
-          continue
-        #counter+=1
-        # check whether each line is non-empty
-        if chunk.decode() :
-          chunk = chunk.decode()
-          # decode each line as response data is in bytes
-          if len(chunk) > 12 and "content" in json.loads(chunk[6:])['choices'][0]['delta']:
-              #if len(json.loads(chunk.decode()[6:])['choices'][0]["delta"]) == 0:
-              #  break
-              partial_words = partial_words + json.loads(chunk[6:])['choices'][0]["delta"]["content"]
-              if token_counter == 0:
-                history.append(" " + partial_words)
-              else:
-                history[-1] = partial_words
-              chat = [(parse_codeblock(history[i]), parse_codeblock(history[i + 1])) for i in range(0, len(history) - 1, 2) ]  # convert to tuples of list
-              token_counter+=1
-              yield chat, history, chat_counter, response  # resembles {chatbot: chat, state: history}  
+    counter = 0
+
+    try:
+        # make a POST request to the API endpoint using the requests.post method, passing in stream=True
+        response = requests.post(API_URL, headers=headers, json=payload, stream=True)
+        response_code = f"{response}"
+        #if response_code.strip() != "<Response [200]>":
+        #    #print(f"response code - {response}")
+        #    raise Exception(f"Sorry, hitting rate limit. Please try again later. {response}")
+        
+        for chunk in response.iter_lines():
+            #Skipping first chunk
+            if counter == 0:
+                counter += 1
+                continue
+                #counter+=1
+            # check whether each line is non-empty
+            if chunk.decode() :
+                chunk = chunk.decode()
+                # decode each line as response data is in bytes
+                if len(chunk) > 12 and "content" in json.loads(chunk[6:])['choices'][0]['delta']:
+                    partial_words = partial_words + json.loads(chunk[6:])['choices'][0]["delta"]["content"]
+                    if token_counter == 0:
+                        history.append(" " + partial_words)
+                    else:
+                        history[-1] = partial_words
+                    token_counter += 1
+                    yield [(parse_codeblock(history[i]), parse_codeblock(history[i + 1])) for i in range(0, len(history) - 1, 2) ], history, chat_counter, response, gr.update(interactive=False), gr.update(interactive=False)  # resembles {chatbot: chat, state: history}  
+    except Exception as e:
+        print (f'error found: {e}')
+    yield [(parse_codeblock(history[i]), parse_codeblock(history[i + 1])) for i in range(0, len(history) - 1, 2) ], history, chat_counter, response, gr.update(interactive=True), gr.update(interactive=True)
     print(json.dumps({"chat_counter": chat_counter, "payload": payload, "partial_words": partial_words, "token_counter": token_counter, "counter": counter}))
                    
 
 def reset_textbox():
-    return gr.update(value='')
+    return gr.update(value='', interactive=False), gr.update(interactive=False)
 
-title = """<h1 align="center">🔥GPT4 with ChatCompletions API +🚀Gradio-Streaming</h1>"""
+title = """<h1 align="center">GPT4 Chatbot</h1>"""
 if DISABLED:
     title = """<h1 align="center" style="color:red">This app has reached OpenAI's usage limit. We are currently requesting an increase in our quota. Please check back in a few days.</h1>"""
 description = """Language models can be conditioned to act like dialogue agents through a conversational prompt that typically takes the form:
@@ -136,8 +135,10 @@ with gr.Blocks(css = """#col_container { margin-left: auto; margin-right: auto;}
                 #chatbot {height: 520px; overflow: auto;}""",
               theme=theme) as demo:
     gr.HTML(title)
-    gr.HTML("""<h3 align="center">🔥This Huggingface Gradio Demo provides you full access to GPT4 API (4096 token limit). 🎉🥳🎉You don't need any OPENAI API key🙌</h1>""")
-    gr.HTML('''<center><a href="https://huggingface.co/spaces/ysharma/ChatGPT4?duplicate=true"><img src="https://bit.ly/3gLdBN6" alt="Duplicate Space"></a>Duplicate the Space and run securely with your OpenAI API Key</center>''')
+    #gr.HTML("""<h3 align="center">This app provides you full access to GPT4 (4096 token limit). You don't need any OPENAI API key.</h1>""")
+    gr.HTML("""<h3 align="center" style="color: red;">If this app is too busy, consider trying our GPT-3.5 app, which has a much shorter queue time. Visit it below:<br/><a href="https://huggingface.co/spaces/yuntian-deng/ChatGPT">https://huggingface.co/spaces/yuntian-deng/ChatGPT</a></h3>""")
+
+    #gr.HTML('''<center><a href="https://huggingface.co/spaces/ysharma/ChatGPT4?duplicate=true"><img src="https://bit.ly/3gLdBN6" alt="Duplicate Space"></a>Duplicate the Space and run securely with your OpenAI API Key</center>''')
     with gr.Column(elem_id = "col_container", visible=False) as main_block:
         #GPT4 API Key is provided by Huggingface 
         #openai_api_key = gr.Textbox(type='password', label="Enter only your GPT4 OpenAI API key here")
@@ -178,11 +179,11 @@ with gr.Blocks(css = """#col_container { margin-left: auto; margin-right: auto;}
         def enable_inputs():
             return user_consent_block.update(visible=False), main_block.update(visible=True)
 
-    accept_button.click(fn=enable_inputs, inputs=[], outputs=[user_consent_block, main_block])
+    accept_button.click(fn=enable_inputs, inputs=[], outputs=[user_consent_block, main_block], queue=False)
 
-    inputs.submit( predict, [inputs, top_p, temperature, chat_counter, chatbot, state], [chatbot, state, chat_counter, server_status_code],)  #openai_api_key
-    b1.click( predict, [inputs, top_p, temperature, chat_counter, chatbot, state], [chatbot, state, chat_counter, server_status_code],)  #openai_api_key
-    b1.click(reset_textbox, [], [inputs])
-    inputs.submit(reset_textbox, [], [inputs])
-                    
-    demo.queue(max_size=20, concurrency_count=10).launch()
+    inputs.submit(reset_textbox, [], [inputs, b1], queue=False)
+    inputs.submit(predict, [inputs, top_p, temperature, chat_counter, chatbot, state], [chatbot, state, chat_counter, server_status_code, inputs, b1],)  #openai_api_key
+    b1.click(reset_textbox, [], [inputs, b1], queue=False)
+    b1.click(predict, [inputs, top_p, temperature, chat_counter, chatbot, state], [chatbot, state, chat_counter, server_status_code, inputs, b1],)  #openai_api_key
+             
+    demo.queue(max_size=20, concurrency_count=3, api_open=False).launch()
