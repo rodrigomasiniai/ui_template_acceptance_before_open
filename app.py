@@ -8,6 +8,9 @@ MODEL = "gpt-4"
 API_URL = os.getenv("API_URL")
 DISABLED = os.getenv("DISABLED") == 'True'
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+NUM_THREADS = int(os.getenv("NUM_THREADS"))
+
+print (NUM_THREADS)
 
 def exception_handler(exception_type, exception, traceback):
     print("%s: %s" % (exception_type.__name__, exception))
@@ -186,4 +189,4 @@ with gr.Blocks(css = """#col_container { margin-left: auto; margin-right: auto;}
     b1.click(reset_textbox, [], [inputs, b1], queue=False)
     b1.click(predict, [inputs, top_p, temperature, chat_counter, chatbot, state], [chatbot, state, chat_counter, server_status_code, inputs, b1],)  #openai_api_key
              
-    demo.queue(max_size=20, concurrency_count=2, api_open=False).launch()
+    demo.queue(max_size=20, concurrency_count=NUM_THREADS, api_open=False).launch()
