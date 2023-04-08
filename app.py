@@ -165,6 +165,8 @@ with gr.Blocks(css = """#col_container { margin-left: auto; margin-right: auto;}
     
     with gr.Column(elem_id = "user_consent_container") as user_consent_block:
         # Get user consent
+        accept_checkbox = gr.Checkbox(visible=False)
+        js = "(x) => confirm('By clicking \"OK\", I agree that my data may be published or shared.')"
         with gr.Accordion("User Consent for Data Collection, Use, and Sharing", open=True):
             gr.HTML("""
             <div>
@@ -183,7 +185,8 @@ with gr.Blocks(css = """#col_container { margin-left: auto; margin-right: auto;}
         def enable_inputs():
             return user_consent_block.update(visible=False), main_block.update(visible=True)
 
-    accept_button.click(fn=enable_inputs, inputs=[], outputs=[user_consent_block, main_block], queue=False)
+    accept_button.click(None, None, accept_checkbox, _js=js, queue=False)
+    accept_checkbox.change(fn=enable_inputs, inputs=[], outputs=[user_consent_block, main_block], queue=False)
 
     inputs.submit(reset_textbox, [], [inputs, b1], queue=False)
     inputs.submit(predict, [inputs, top_p, temperature, chat_counter, chatbot, state], [chatbot, state, chat_counter, server_status_code, inputs, b1],)  #openai_api_key
