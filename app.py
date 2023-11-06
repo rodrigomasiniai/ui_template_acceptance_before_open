@@ -120,7 +120,7 @@ def predict(inputs, top_p, temperature, chat_counter, chatbot, history, request:
 def reset_textbox():
     return gr.update(value='', interactive=False), gr.update(interactive=False)
 
-title = """<h1 align="center">GPT4 Chatbot</h1>"""
+title = """<h1 align="center">GPT-4 Turbo Chatbot</h1>"""
 if DISABLED:
     title = """<h1 align="center" style="color:red">This app has reached OpenAI's usage limit. We are currently requesting an increase in our quota. Please check back in a few days.</h1>"""
 description = """Language models can be conditioned to act like dialogue agents through a conversational prompt that typically takes the form:
@@ -131,7 +131,7 @@ User: <utterance>
 Assistant: <utterance>
 ...
 ```
-In this app, you can explore the outputs of a gpt-4 LLM.
+In this app, you can explore the outputs of a gpt-4 turbo LLM.
 """
 
 theme = gr.themes.Default(primary_hue="green")                
@@ -140,7 +140,7 @@ with gr.Blocks(css = """#col_container { margin-left: auto; margin-right: auto;}
                 #chatbot {height: 520px; overflow: auto;}""",
               theme=theme) as demo:
     gr.HTML(title)
-    #gr.HTML("""<h3 align="center">This app provides you full access to GPT4 (4096 token limit). You don't need any OPENAI API key.</h1>""")
+    #gr.HTML("""<h3 align="center">This app provides you full access to GPT-4 Turbo (128K token limit). You don't need any OPENAI API key.</h1>""")
     gr.HTML("""<h3 align="center" style="color: red;">If this app is too busy, consider trying our GPT-3.5 app, which has a much shorter queue time. Visit it below:<br/><a href="https://huggingface.co/spaces/yuntian-deng/ChatGPT">https://huggingface.co/spaces/yuntian-deng/ChatGPT</a></h3>""")
 
     #gr.HTML('''<center><a href="https://huggingface.co/spaces/ysharma/ChatGPT4?duplicate=true"><img src="https://bit.ly/3gLdBN6" alt="Duplicate Space"></a>Duplicate the Space and run securely with your OpenAI API Key</center>''')
