@@ -8,6 +8,8 @@ MODEL = "gpt-4-1106-preview"
 API_URL = os.getenv("API_URL")
 DISABLED = os.getenv("DISABLED") == 'True'
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+print (API_URL)
+print (OPENAI_API_KEY)
 NUM_THREADS = int(os.getenv("NUM_THREADS"))
 
 print (NUM_THREADS)
