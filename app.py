@@ -5,7 +5,6 @@ import json
 import requests
 
 MODEL = "gpt-4-1106-preview"
-MODEL = "gpt-4"
 API_URL = os.getenv("API_URL")
 DISABLED = os.getenv("DISABLED") == 'True'
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
