@@ -123,7 +123,7 @@ def reset_textbox():
 
 title = """<h1 align="center">GPT-4 Turbo: Research Preview (128K token limit, Short-Term Availability)</h1>"""
 if DISABLED:
-    title = """<h1 align="center" style="color:red">This app has reached OpenAI's usage limit. We are currently requesting an increase in our quota. Please check back tomorrow.</h1>"""
+    title = """<h1 align="center" style="color:red">This app has reached OpenAI's usage limit. Please check back tomorrow.</h1>"""
 description = """Language models can be conditioned to act like dialogue agents through a conversational prompt that typically takes the form:
 ```
 User: <utterance>
@@ -142,7 +142,8 @@ with gr.Blocks(css = """#col_container { margin-left: auto; margin-right: auto;}
               theme=theme) as demo:
     gr.HTML(title)
     #gr.HTML("""<h3 align="center">This app provides you full access to GPT-4 Turbo (128K token limit). You don't need any OPENAI API key.</h1>""")
-    gr.HTML("""<h3 align="center" style="color: red;">If this app is too busy, consider trying our GPT-3.5 app, which has a much shorter queue time. Visit it below:<br/><a href="https://huggingface.co/spaces/yuntian-deng/ChatGPT">https://huggingface.co/spaces/yuntian-deng/ChatGPT</a></h3>""")
+    #gr.HTML("""<h3 align="center" style="color: red;">If this app is too busy, consider trying our GPT-3.5 app, which has a much shorter queue time. Visit it below:<br/><a href="https://huggingface.co/spaces/yuntian-deng/ChatGPT">https://huggingface.co/spaces/yuntian-deng/ChatGPT</a></h3>""")
+    gr.HTML("""<h3 align="center" style="color: red;">If this app doesn't respond, it's likely due to our API key hitting the daily limit of our organization. Consider trying our GPT-3.5 app:<br/><a href="https://huggingface.co/spaces/yuntian-deng/ChatGPT">https://huggingface.co/spaces/yuntian-deng/ChatGPT</a></h3>""")
 
     #gr.HTML('''<center><a href="https://huggingface.co/spaces/ysharma/ChatGPT4?duplicate=true"><img src="https://bit.ly/3gLdBN6" alt="Duplicate Space"></a>Duplicate the Space and run securely with your OpenAI API Key</center>''')
     with gr.Column(elem_id = "col_container", visible=False) as main_block:
